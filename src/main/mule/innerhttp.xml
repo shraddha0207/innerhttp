@@ -1,0 +1,42 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<mule xmlns:api-gateway="http://www.mulesoft.org/schema/mule/api-gateway" xmlns:email="http://www.mulesoft.org/schema/mule/email"
+	xmlns:ee="http://www.mulesoft.org/schema/mule/ee/core"
+	xmlns:http="http://www.mulesoft.org/schema/mule/http" xmlns="http://www.mulesoft.org/schema/mule/core" xmlns:doc="http://www.mulesoft.org/schema/mule/documentation" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.mulesoft.org/schema/mule/core http://www.mulesoft.org/schema/mule/core/current/mule.xsd
+http://www.mulesoft.org/schema/mule/http http://www.mulesoft.org/schema/mule/http/current/mule-http.xsd
+http://www.mulesoft.org/schema/mule/ee/core http://www.mulesoft.org/schema/mule/ee/core/current/mule-ee.xsd
+http://www.mulesoft.org/schema/mule/email http://www.mulesoft.org/schema/mule/email/current/mule-email.xsd
+http://www.mulesoft.org/schema/mule/api-gateway http://www.mulesoft.org/schema/mule/api-gateway/current/mule-api-gateway.xsd">
+	<http:listener-config name="HTTP_Listener_config" doc:name="HTTP Listener config" doc:id="70a71b45-396a-45fa-abcd-2343a6f3fc28" >
+		<http:listener-connection host="0.0.0.0" port="8081" />
+	</http:listener-config>
+	<http:request-config name="HTTP_Request_configuration" doc:name="HTTP Request configuration" doc:id="a4acce89-c01c-4568-8e07-b7236510207d" >
+		<http:request-connection host="localhost" port="8081" />
+	</http:request-config>
+	<api-gateway:autodiscovery apiId="16008095" doc:name="API Autodiscovery" doc:id="10a63fb8-3b1e-4287-8345-5e908fb1ab9f" flowRef="innerhttpFlow" />
+	<flow name="innerhttpFlow" doc:id="e12ca568-f39e-4e99-b67e-d5ec2e700394" >
+		<http:listener doc:name="Listener" doc:id="10e01d09-25bc-4eac-a35f-f3739ac52867" config-ref="HTTP_Listener_config" path="/mainHttp"/>
+		<set-payload value="payload of main http" doc:name="Set Payload" doc:id="ee2959aa-31b1-4ffa-b9e3-f1e8c2e4efd4" />
+		<http:request method="GET" doc:name="Request" doc:id="aeafab68-03f7-4ee7-a987-1e38a70eb828" config-ref="HTTP_Request_configuration" path="/innerHttp"/>
+		<logger level="INFO" doc:name="Logger" doc:id="ec32ff97-7079-4903-a0fb-e884ba8ee33a" message="#[payload]"/>
+		<logger level="INFO" doc:name="Logger" doc:id="a8749be7-b64a-43e2-8645-20f44ed3d880" message="flow completed"/>
+	</flow>
+	<flow name="innerhttpFlow1" doc:id="fe46af51-c2bf-4afd-b03e-bfde965e476e" >
+		<http:listener doc:name="Listener" doc:id="b994cc68-34a0-4f5f-bee4-ca73ffadc397" config-ref="HTTP_Listener_config" path="/innerHttp"/>
+		<ee:transform doc:name="Transform Message" doc:id="0f4e9587-5618-40af-8429-8e8f62eac9a6" >
+			<ee:message >
+				<ee:set-payload ><![CDATA[%dw 2.0
+output application/json
+var a=0
+var b=1
+---
+{
+	result : |2003-10-01T03:00:09| ,
+	result1 : |P1Y| - |2003-10-01|
+}
+]]></ee:set-payload>
+			</ee:message>
+		</ee:transform>
+		<set-payload value="#[payload.result]" doc:name="Set Payload" doc:id="decfb8e4-fc07-428d-94a8-5a0920bb0094" />
+	</flow>
+</mule>
